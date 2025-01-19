@@ -5,16 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Download Files</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .folder { color: #2c5282; cursor: pointer; }
+        .file { color: #2d3748; }
+        .back { color: #718096; cursor: pointer; }
+        .item { padding: 5px; }
+    </style>
 </head>
 <body>
     <h1>Download Files</h1>
-    <form action="/download" method="GET">
+    <div id="password-form">
         <label for="password">Password:</label>
-        <input type="password" name="password" required>
-        <label for="filename">Filename:</label>
-        <input type="text" name="filename" required>
-        <button type="submit">Download</button>
-    </form>
+        <input type="password" id="password" required>
+        <button onclick="listFiles()">Show Files</button>
+    </div>
+    <div id="files-list" style="display: none;">
+        <h2>Files and Folders: <span id="current-path"></span></h2>
+        <ul id="files"></ul>
+    </div>
     <a href="/">Back to Home</a>
+
+    <script>
+        let currentPath = '';
+        let currentPassword = '';
+
+        function listFiles(path = '') {
+            const password = document.getElementById('password').value;
+            currentPassword = password;
+            currentPath = path;
+
+            fetch('/list_files', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `password=${encodeURIComponent(password)}&path=${encodeURIComponent(path)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                const filesList = document.getElementById('files');
+                filesList.innerHTML = '';
+                document.getElementById('current-path').textContent = data.current_path || '/';
+
+                // Add back button if in subfolder
+                if (data.current_path) {
+                    const li = document.createElement('li');
+                    li.className = 'item back';
+                    li.innerHTML = '📁 ..';
+                    li.onclick = () => {
+                        const parentPath = data.current_path.split('/').slice(0, -1).join('/');
+                        listFiles(parentPath);
+                    };
+                    filesList.appendChild(li);
+                }
+
+                data.items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'item';
+                    
+                    if (item.is_directory) {
+                        li.className += ' folder';
+                        li.innerHTML = `📁 ${item.name}`;
+                        li.onclick = () => listFiles(item.path);
+                    } else {
+                        li.className += ' file';
+                        const link = document.createElement('a');
+                        link.href = `/download_file?password=${encodeURIComponent(password)}&filepath=${encodeURIComponent(item.path)}`;
+                        link.innerHTML = `📄 ${item.name}`;
+                        li.appendChild(link);
+                    }
+                    filesList.appendChild(li);
+                });
+                
+                document.getElementById('files-list').style.display = 'block';
+            })
+            .catch(error => alert(error,'Error listing files'));
+        }
+    </script>
 </body>
 </html>
