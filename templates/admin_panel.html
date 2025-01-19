@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="admin-panel">
+    <div class="header">
+        <h1>Admin Panel</h1>
+        <div class="user-info">
+            Logged in as Admin |
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+
+    <h2>Registered Users</h2>
+    {% if users %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Root Folder</th>
+                    <th>Password Hash</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for username, data in users.items() %}
+                <tr>
+                    <td>{{ username }}</td>
+                    <td>{{ data.root_folder }}</td>
+                    <td><code>{{ data.password }}</code></td>
+                    <td>
+                        <button onclick="deleteUser('{{ username }}')" class="delete-btn">Delete User</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No users registered yet.</p>
+    {% endif %}
+
+    <script>
+        function deleteUser(username) {
+            if (confirm(`Are you sure you want to delete user "${username}"?`)) {
+                // TODO: Implement user deletion in a future update
+                alert('User deletion will be implemented in a future update');
+            }
+        }
+    </script>
+</body>
+</html>

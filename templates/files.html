@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Files</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .folder { color: #2c5282; cursor: pointer; }
+        .file { color: #2d3748; }
+        .back { color: #718096; cursor: pointer; }
+        .item { padding: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .controls { display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>My Files</h1>
+        <div class="user-info">
+            Welcome, {{ session.username }}! 
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+
+    <div class="actions">
+        <div class="upload-section">
+            <input type="file" id="file-input">
+            <button onclick="uploadFile()">Upload File</button>
+        </div>
+        <div class="create-folder-section">
+            <input type="text" id="new-folder-name" placeholder="New folder name">
+            <button onclick="createFolder()">Create Folder</button>
+        </div>
+    </div>
+
+    <div id="files-list">
+        <h2>Current Path: <span id="current-path">/</span></h2>
+        <ul id="files"></ul>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <script>
+        // Initialize files listing when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            listFiles('');  // Load root folder contents
+        });
+    </script>
+</body>
+</html>
